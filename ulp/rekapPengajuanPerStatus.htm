@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['bar']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+			['Status', 'Jumlah Paket', { role: 'style' } ],
+			['BAHP', 24, 'gold'],
+			['DIKEMBALIKAN', 3, 'gold'],
+			['DITERIMA', 0, 'gold'],
+			['PENERBITAN', 126, 'gold'],
+			['PROSES', 5, 'gold'],
+			['SELESAI', 2, 'gold']
+		  ]);
+
+        var options = {
+          chart: {
+            title: 'Rekap Pengajuan Per Status',
+            subtitle: 'Tahun 2017',
+          }
+        };
+
+        var chart = new google.charts.Bar(document.getElementById('columnchart_material'));
+
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+      }
+    </script>
+  </head>
+  <body>
+    <div id="columnchart_material" style="width: 550px; height: 350px;"></div>
+  </body>
+</html>

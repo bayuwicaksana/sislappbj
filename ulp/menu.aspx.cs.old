@@ -1,0 +1,500 @@
+#region " using "
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using Smarty;
+using System.Configuration;
+using System.Data.SqlClient;
+using Npgsql;
+
+#endregion
+
+public partial class CMenu : AspNetRunnerPage
+{
+    private NpgsqlDataAdapter NpAdapter;
+    private System.Data.DataSet dset = null;
+    private System.Data.DataTable dtsource = null;
+
+    private SqlDataAdapter SqlAdapter;
+    private System.Data.DataSet dset2 = null;
+    private System.Data.DataTable dtsource2 = null;
+
+    string _cbMessage = "";
+    string type = string.Empty;
+
+    public void RaiseCallbackEvent(String eventArgument)
+    {
+        try
+        {
+            Page.ClientScript.ValidateEvent("actionList", "actionList");
+            _cbMessage = "Correct event raised callback.";
+        }
+        catch (Exception ex)
+        {
+            _cbMessage = "Incorrect event raised callback.";
+        }
+    }
+
+    void Page_Load( object sender,  System.EventArgs e) 
+    {
+        CheckSecurity();
+           
+        //show appropriate menu based on user group
+        SqlConnection myConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString);
+        string ssql = "select distinct kodekelompok from pengguna where nama = '" + UserName + "';";
+        SqlCommand myCommand = new SqlCommand();
+        myCommand.CommandText = ssql;
+        myCommand.CommandType = CommandType.Text;
+        myCommand.Connection = myConnection;
+        myConnection.Open();
+        SqlDataReader myReader = myCommand.ExecuteReader(CommandBehavior.CloseConnection);
+
+        while (myReader.Read())
+        {
+            type = myReader.GetValue(0).ToString();
+
+            if (type == "DLP")
+            {
+                menu.InnerHtml = adminMenu();
+            }
+            else if (type == "SEKRETARIAT")
+            {
+                menu.InnerHtml = ulpMenu();
+            }
+			else if (type == "ANGGOTA")
+			{
+                menu.InnerHtml = anggotaMenu();
+			}
+			else if (type == "SKPD")
+			{
+                menu.InnerHtml = skpdMenu();
+			}
+            else
+            {
+                menu.InnerHtml = otherMenu();
+            }
+        }
+
+        myReader.Close();
+
+        if (!IsPostBack)
+        {
+            ClientScriptManager cs = Page.ClientScript;
+            String cbReference = cs.GetCallbackEventReference("'" +
+                Page.UniqueID + "'", "arg", "ReceiveServerData", "",
+                "ProcessCallBackError", false);
+            String callbackScript = "function CallTheServer(arg, context) {" +
+                cbReference + "; }";
+            cs.RegisterClientScriptBlock(this.GetType(), "CallTheServer",
+                callbackScript, true);
+
+            GridLokalLoad(type);
+
+            LPSELoad(type);
+
+        }
+
+    }
+
+    private void LPSELoad(string type)
+    {
+        NpgsqlConnection pgConnection = new NpgsqlConnection(ConfigurationManager.ConnectionStrings["PGConnectionString"].ConnectionString);
+        string ssql = string.Empty;
+
+        if (type == "ANGGOTA" || type == "UMUM")
+        {
+            ssql = "select paket.pkt_nama Kegiatan, tahap.thp_nama Tahapan, jadwal.dtj_tglawal Awal, jadwal.dtj_tglakhir Akhir, " +
+                                "peg_nama Nama, ltrim(rtrim(replace(peg_nip, ' ', ''))) NIP " +
+                            "from jadwal  " +
+                                "inner join tahap on tahap.thp_id = jadwal.thp_id  " +
+                                "inner join lelang_seleksi on lelang_seleksi.lls_id = jadwal.lls_id and lelang_seleksi.lls_status = 1  " +
+                                "inner join paket on paket.pkt_id = lelang_seleksi.pkt_id and paket.pkt_status = 1  " +
+                                "inner join paket_panitia on paket.pkt_id = paket_panitia.pkt_id  " +
+                                "inner join anggota_panitia on anggota_panitia.pnt_id = paket_panitia.pnt_id  " +
+                                "inner join pegawai on pegawai.peg_id = anggota_panitia.peg_id " +
+                            "where 1=1 " +
+                                "and date_part('day', jadwal.dtj_tglakhir) = date_part('day', now()) AND date_part('month', jadwal.dtj_tglakhir) = date_part('month', now()) AND date_part('year', jadwal.dtj_tglakhir) = date_part('year', now())" +
+                                "and jadwal.lls_id = lelang_seleksi.lls_id " +
+                                "and ltrim(rtrim(replace(peg_nip, ' ', ''))) = '" + UserName + "'" +
+                            "order by jadwal.lls_id, jadwal.dtj_tglawal, jadwal.dtj_tglakhir";
+
+        }
+        else
+        {
+            ssql = "select paket.pkt_nama Kegiatan, tahap.thp_nama Tahapan, jadwal.dtj_tglawal Awal, jadwal.dtj_tglakhir Akhir, " +
+                                "peg_nama Nama, ltrim(rtrim(replace(peg_nip, ' ', ''))) NIP " +
+                            "from jadwal  " +
+                                "inner join tahap on tahap.thp_id = jadwal.thp_id  " +
+                                "inner join lelang_seleksi on lelang_seleksi.lls_id = jadwal.lls_id and lelang_seleksi.lls_status = 1  " +
+                                "inner join paket on paket.pkt_id = lelang_seleksi.pkt_id and paket.pkt_status = 1  " +
+                                "inner join paket_panitia on paket.pkt_id = paket_panitia.pkt_id  " +
+                                "inner join anggota_panitia on anggota_panitia.pnt_id = paket_panitia.pnt_id  " +
+                                "inner join pegawai on pegawai.peg_id = anggota_panitia.peg_id " +
+                            "where 1=1 " +
+                                "and date_part('day', jadwal.dtj_tglakhir) = date_part('day', now()) AND date_part('month', jadwal.dtj_tglakhir) = date_part('month', now()) AND date_part('year', jadwal.dtj_tglakhir) = date_part('year', now())" +
+                                "and jadwal.lls_id = lelang_seleksi.lls_id " +
+                                //"and ltrim(rtrim(replace(peg_nip, ' ', ''))) = '" + Session["pusername"] + "'" +
+                            "order by jadwal.lls_id, jadwal.dtj_tglawal, jadwal.dtj_tglakhir";
+        }
+
+        //NpgsqlCommand myCommand = new NpgsqlCommand();
+
+        //myCommand.CommandText = ssql;
+        //myCommand.CommandType = CommandType.Text;
+        //myCommand.Connection = pgConnection;
+
+        try
+        {
+
+            pgConnection.Open();
+
+            //NpgsqlDataReader myReader = myCommand.ExecuteReader(CommandBehavior.CloseConnection);
+
+            /*
+            while (myReader.Read())
+            {
+
+            }
+            */
+
+            dset = new DataSet("npdata");
+            NpAdapter = new NpgsqlDataAdapter();
+            NpAdapter.SelectCommand = new NpgsqlCommand(ssql, pgConnection);
+            NpAdapter.Fill(dset, "npdata");
+            dtsource = dset.Tables["npdata"];
+
+            gridJadwal.DataSource = dtsource;
+            gridJadwal.DataBind();
+            //gridJadwal.SetDataBinding(dset, "npdata");
+
+            //myReader.Close();
+
+            lpseStatusLabel.Text = "Tersambung";
+            pgParameterLabel.Text = ConfigurationManager.ConnectionStrings["PGConnectionString"].ConnectionString.Substring(0, 20);
+
+        }
+        catch (Exception ex)
+        {
+            lpseStatusLabel.Text = "Terputus" + " (Pesan Kesalahan: " + ex.Message + ")";
+            pgParameterLabel.Text = ConfigurationManager.ConnectionStrings["PGConnectionString"].ConnectionString;
+        }
+    }
+
+    private void GridLokalLoad(string type)
+    {
+        SqlConnection sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString);
+        string ssql = string.Empty;
+
+        if (type == "ANGGOTA" || type == "UMUM")
+        {
+            ssql = "select pbj.KodePbj, pbj.NAMAKEGIATAN [Kegiatan], " +
+                        "pbj.NAMAPAKET [Tahapan], " +
+                        "pbj.KODEJENISKEGIATAN [Jenis Kegiatan], " +
+                        "pbj.TANGGALPENGAJUAN [Tanggal Pengajuan], " +
+                        "pbj.PEMBAWABERKAS1 [Pembawa Berkas], " +
+                        "pbj.PENERIMABERKAS1 [Penerima Berkas], " +
+                        "a.NIP, " +
+                        "a.NOSURATTUGAS [Surat Tugas], " +
+                        "pbjStatus.DESKRIPSI [Status] " +
+                    "from PBJ pbj " +
+                        "inner join STATUSPBJ pbjStatus on pbj.KODESTATUSPBJ = pbjStatus.KODESTATUS " +
+                        "inner join ASSIGNMENT a on a.KODEPBJ = pbj.KODEPBJ " +
+                    "where pbj.KODESTATUSPBJ IN ('PENGAJUAN','DITERIMA','KOORDINASI','PENERBITAN') AND a.NIP = '" + UserName + "' " +
+                        "order by pbj.TANGGALPENGAJUAN, a.NIP";
+        }
+        else
+        {
+            ssql = "select pbj.KodePbj, pbj.NAMAKEGIATAN [Kegiatan], " +
+                        "pbj.NAMAPAKET [Tahapan], " +
+                        "pbj.KODEJENISKEGIATAN [Jenis Kegiatan], " +
+                        "pbj.TANGGALPENGAJUAN [Tanggal Pengajuan], " +
+                        "pbj.PEMBAWABERKAS1 [Pembawa Berkas], " +
+                        "pbj.PENERIMABERKAS1 [Penerima Berkas], " +
+                        "a.NIP, " +
+                        "a.NOSURATTUGAS [Surat Tugas], " +
+                        "pbjStatus.DESKRIPSI [Status] " +
+                    "from PBJ pbj " +
+                        "inner join STATUSPBJ pbjStatus on pbj.KODESTATUSPBJ = pbjStatus.KODESTATUS " +
+                        "inner join ASSIGNMENT a on a.KODEPBJ = pbj.KODEPBJ " +
+                    //"where a.NIP = '" + Session["pusername"] + "' " +
+					"where pbj.KODESTATUSPBJ IN ('PENGAJUAN','DITERIMA','KOORDINASI','PENERBITAN') " +
+                        "order by pbj.TANGGALPENGAJUAN, a.NIP";
+        }
+
+        try
+        {
+
+            sqlConnection.Open();
+
+            //Response.Write(ssql);
+
+            dset2 = new DataSet("npdata2");
+            SqlAdapter = new SqlDataAdapter();
+            SqlAdapter.SelectCommand = new SqlCommand(ssql, sqlConnection);
+            SqlAdapter.Fill(dset2, "npdata2");
+            dtsource2 = dset2.Tables["npdata2"];
+
+            gridJadwalLokal.DataSource = dtsource2;
+            gridJadwalLokal.DataBind();
+
+        }
+        catch (Exception ex)
+        {
+        }
+    }
+
+    protected void gridJadwalLokal_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+
+        DropDownList actionList = e.Row.FindControl("actionList") as DropDownList;
+		ImageButton goImage = e.Row.FindControl("goImage") as ImageButton;
+
+        if (actionList != null)
+        {
+            ListItemCollection items = actionList.Items;
+
+            items.Add(new ListItem("", ""));
+			
+            if (type == "ANGGOTA" || type == "UMUM")
+            {
+                items.Add(new ListItem("Kembali ke SKPD", "DIKEMBALIKAN"));
+                //items.Add(new ListItem("Surat Tugas", "SURATTUGAS"));
+                items.Add(new ListItem("Proses Lelang", "PROSES"));
+				items.Add(new ListItem("Koordinasi SKPD", "KOORDINASI"));
+                //items.Add(new ListItem("BA Pelelangan", "BAHP"));
+				items.Add(new ListItem("Dibatalkan Oleh SKPD", "BATAL"));
+            }
+			else
+			{
+				actionList.Visible = false;
+				goImage.Visible = false;
+			}
+        }
+    }
+
+    protected void gridJadwalLokal_RowCommand(object sender, GridViewCommandEventArgs e)
+    {
+        if (e.CommandName == "action")
+        {
+
+            GridViewRow row = gridJadwalLokal.Rows[Convert.ToInt32(e.CommandArgument)];
+            DropDownList actionList = row.FindControl("actionList") as DropDownList;
+            HiddenField hKodePbj = row.FindControl("hKodePbj") as HiddenField;
+
+            if (actionList != null)
+            {
+                string actionId = actionList.SelectedValue;
+                
+                if (!string.IsNullOrEmpty(actionId))
+                {
+                    SetStatus(hKodePbj.Value, actionId);
+                }
+            }
+
+            //gridJadwalLokal.DataBind();
+            GridLokalLoad(type);
+        }
+    }
+
+    protected void SetStatus(string kodeBpj, string statusId)
+    {
+        SqlConnection myConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString);
+        int result = 0;
+
+        string ssql = string.Format("update PBJ set KODESTATUSPBJ = '{0}' where KODEPBJ = '{1}'", statusId, kodeBpj);
+
+        SqlCommand myCommand = new SqlCommand();
+        myCommand.CommandText = ssql;
+        myCommand.CommandType = CommandType.Text;
+        myCommand.Connection = myConnection;
+        myConnection.Open();
+
+        result = myCommand.ExecuteNonQuery();
+
+        myConnection.Close();
+
+    }
+
+	protected string otherMenu()
+    {
+        string strHTML;
+        strHTML = "";
+
+    strHTML = strHTML + "<ul>";
+    strHTML = strHTML + "<li><a href='menu.aspx'>Home</a></li>";
+    strHTML = strHTML + "<li><a href='#'>Pengadaan Barang/Jasa</a>";
+      strHTML = strHTML + "<ul>";
+        strHTML = strHTML + "<li><a href='PBJ_list.aspx?orderby=dTANGGALPENGAJUAN'>Perekaman Lelang PBJ</a></li>";
+      strHTML = strHTML + "</ul>";
+    strHTML = strHTML + "</li>";
+    strHTML = strHTML + "<li><a href='#'>Penugasan</a>";
+      strHTML = strHTML + "<ul>";
+        strHTML = strHTML + "<li><a href='surat_tugas.aspx?usrgrp=UMUM'>Penugasan Anggota ULP</a></li>";
+      strHTML = strHTML + "</ul>";
+    strHTML = strHTML + "</li>";
+    strHTML = strHTML + "<li><a href='#'>Berita Acara</a>";
+      strHTML = strHTML + "<ul>";
+        strHTML = strHTML + "<li><a href='BAEP.HTML' target='_new'>Cetak BAEP</a></li>";
+        strHTML = strHTML + "<li><a href='BAHP.HTML' target='_new'>Cetak BAHP</a></li>";
+      strHTML = strHTML + "</ul>";
+    strHTML = strHTML + "</li>";
+    strHTML = strHTML + "<li><a href='#'>Reporting</a>";
+      strHTML = strHTML + "<ul>";
+        strHTML = strHTML + "<li><a href='RptRekapPermohonan.aspx?usrgrp=UMUM'>Rekap permohonan lelang</a></li>";
+        strHTML = strHTML + "<li><a href='reporting.aspx?usrgrp=UMUM'>Daftar permohonan lelang dr SKPD</a></li>";
+        strHTML = strHTML + "<li><a href='RPTPENGADAANLANGSUNG.aspx?usrgrp=UMUM'>Daftar pengadaan langsung di SKPD</a></li>";
+        strHTML = strHTML + "<li><a href='StatusPermohonan.aspx?usrgrp=UMUM'>Status tender yg aktif</a></li>";
+        strHTML = strHTML + "<li><a href='StatusPengajuan.aspx?usrgrp=UMUM'>Status permohonan tender</a></li>";
+		strHTML = strHTML + "<li><a href='rptsurat_tugas.aspx?usrgrp=UMUM'>Daftar Surat Tugas</a></li>";
+      strHTML = strHTML + "</ul>";
+    strHTML = strHTML + "</li>";
+    strHTML = strHTML + "</ul>";
+
+		return strHTML;
+    }
+	
+	protected string ulpMenu()
+    {
+        string strHTML;
+        strHTML = "";
+
+    strHTML = strHTML + "<ul>";
+    strHTML = strHTML + "<li><a href='menu.aspx'>Home</a></li>";
+    strHTML = strHTML + "<li><a href='#'>Pengadaan Barang/Jasa</a>";
+      strHTML = strHTML + "<ul>";
+        strHTML = strHTML + "<li><a href='PBJ_list.aspx?orderby=dTANGGALPENGAJUAN'>Perekaman Lelang PBJ</a></li>";
+      strHTML = strHTML + "</ul>";
+    strHTML = strHTML + "</li>";
+    strHTML = strHTML + "<li><a href='#'>Penugasan</a>";
+      strHTML = strHTML + "<ul>";
+        strHTML = strHTML + "<li><a href='surat_tugas.aspx?usrgrp=SEKRETARIAT'>Penugasan Anggota ULP</a></li>";
+      strHTML = strHTML + "</ul>";
+    strHTML = strHTML + "</li>";
+    strHTML = strHTML + "<li><a href='#'>Reporting</a>";
+      strHTML = strHTML + "<ul>";
+        strHTML = strHTML + "<li><a href='RptRekapPermohonan.aspx?usrgrp=SEKRETARIAT'>Rekap permohonan lelang</a></li>";
+        strHTML = strHTML + "<li><a href='reporting.aspx?usrgrp=SEKRETARIAT'>Daftar permohonan lelang dr SKPD</a></li>";
+        strHTML = strHTML + "<li><a href='RPTPENGADAANLANGSUNG.aspx?usrgrp=SEKRETARIAT'>Daftar pengadaan langsung di SKPD</a></li>";
+        strHTML = strHTML + "<li><a href='StatusPermohonan.aspx?usrgrp=SEKRETARIAT'>Status tender yg aktif</a></li>";
+        strHTML = strHTML + "<li><a href='StatusPengajuan.aspx?usrgrp=SEKRETARIAT'>Status permohonan tender</a></li>";
+		strHTML = strHTML + "<li><a href='rptsurat_tugas.aspx?usrgrp=SEKRETARIAT'>Daftar Surat Tugas</a></li>";
+      strHTML = strHTML + "</ul>";
+    strHTML = strHTML + "</li>";
+    strHTML = strHTML + "</ul>";
+
+		return strHTML;
+    }
+	
+	protected string adminMenu()
+    {
+        string strHTML;
+        strHTML = "";
+
+    strHTML = strHTML + "<ul>";
+    strHTML = strHTML + "<li><a href='menu.aspx'>Home</a></li>";
+    strHTML = strHTML + "<li><a href='#'>Pengadaan Barang/Jasa</a>";
+      strHTML = strHTML + "<ul>";
+        strHTML = strHTML + "<li><a href='PBJ_list.aspx?orderby=dTANGGALPENGAJUAN'>Perekaman Lelang PBJ</a></li>";
+        strHTML = strHTML + "<li><a href='PENGADAAN_LANGSUNG_list.aspx'>Perekaman Pengadaan Langsung</a></li>";
+      strHTML = strHTML + "</ul>";
+    strHTML = strHTML + "</li>";
+    strHTML = strHTML + "<li><a href='#'>Penugasan</a>";
+      strHTML = strHTML + "<ul>";
+        strHTML = strHTML + "<li><a href='surat_tugas.aspx?usrgrp=DLP'>Penugasan Anggota ULP</a></li>";
+      strHTML = strHTML + "</ul>";
+    strHTML = strHTML + "</li>";
+    strHTML = strHTML + "<li><a href='#'>Berita Acara</a>";
+      strHTML = strHTML + "<ul>";
+        strHTML = strHTML + "<li><a href='BAEP.HTML' target='_new'>Cetak BAEP</a></li>";
+        strHTML = strHTML + "<li><a href='BAHP.HTML' target='_new'>Cetak BAHP</a></li>";
+      strHTML = strHTML + "</ul>";
+    strHTML = strHTML + "</li>";
+    strHTML = strHTML + "<li><a href='#'>Reporting</a>";
+      strHTML = strHTML + "<ul>";
+        strHTML = strHTML + "<li><a href='RptRekapPermohonan.aspx?usrgrp=DLP'>Rekap permohonan lelang</a></li>";
+        strHTML = strHTML + "<li><a href='reporting.aspx?usrgrp=DLP'>Daftar permohonan lelang dr SKPD</a></li>";
+        strHTML = strHTML + "<li><a href='RPTPENGADAANLANGSUNG.aspx?usrgrp=DLP'>Daftar pengadaan langsung di SKPD</a></li>";
+        strHTML = strHTML + "<li><a href='StatusPermohonan.aspx?usrgrp=DLP'>Status tender yg aktif</a></li>";
+        strHTML = strHTML + "<li><a href='StatusPengajuan.aspx?usrgrp=DLP'>Status permohonan tender</a></li>";
+		strHTML = strHTML + "<li><a href='rptsurat_tugas.aspx?usrgrp=DLP'>Daftar Surat Tugas</a></li>";
+      strHTML = strHTML + "</ul>";
+    strHTML = strHTML + "</li>";
+    strHTML = strHTML + "<li><a href='#'>Admin</a>";
+      strHTML = strHTML + "<ul>";
+        strHTML = strHTML + "<li><a href='PENGGUNA_list.aspx'>Pengguna</a></li>";
+		strHTML = strHTML + "<li><a href='KELOMPOKPENGGUNA_list.aspx'>Kelompok Pengguna</a></li>";
+        strHTML = strHTML + "<li><a href='AKTOR_list.aspx'>Aktor</a></li>";
+		strHTML = strHTML + "<li><a href='TIPEAKTOR_list.aspx'>Tipe Aktor</a></li>";
+		strHTML = strHTML + "<li><a href='JABATANAKTOR_list.aspx'>Jabatan Aktor</a></li>";
+        strHTML = strHTML + "<li><a href='KELENGKAPAN_list.aspx'>Kelengkapan</a></li>";
+		strHTML = strHTML + "<li><a href='DOKUMEN_list.aspx'>Dokumen</a></li>";
+		strHTML = strHTML + "<li><a href='JENISKEGIATAN_list.aspx'>Jenis Kegiatan</a></li>";
+		strHTML = strHTML + "<li><a href='SKPD_list.aspx'>SKPD</a></li>";
+		strHTML = strHTML + "<li><a href='STATUSPBJ_list.aspx'>Status</a></li>";
+		strHTML = strHTML + "</li>";
+      strHTML = strHTML + "</ul>";   
+    strHTML = strHTML + "</li>";
+    strHTML = strHTML + "</ul>";
+
+		return strHTML;
+    }
+	
+	protected string anggotaMenu()
+    {
+        string strHTML;
+        strHTML = "";
+
+    strHTML = strHTML + "<ul>";
+    strHTML = strHTML + "<li><a href='menu.aspx'>Home</a></li>";
+    strHTML = strHTML + "<li><a href='#'>Berita Acara</a>";
+      strHTML = strHTML + "<ul>";
+        strHTML = strHTML + "<li><a href='BAEP.HTML' target='_new'>Cetak BAEP</a></li>";
+        strHTML = strHTML + "<li><a href='BAHP.HTML' target='_new'>Cetak BAHP</a></li>";
+      strHTML = strHTML + "</ul>";
+    strHTML = strHTML + "</li>";
+    strHTML = strHTML + "</ul>";
+
+		return strHTML;
+    }
+	
+	protected string skpdMenu()
+    {
+        string strHTML;
+        strHTML = "";
+
+    strHTML = strHTML + "<ul>";
+    strHTML = strHTML + "<li><a href='menu.aspx'>Home</a></li>";
+    strHTML = strHTML + "<li><a href='#'>Pengadaan Barang/Jasa</a>";
+      strHTML = strHTML + "<ul>";
+        strHTML = strHTML + "<li><a href='PENGADAAN_LANGSUNG_list.aspx'>Perekaman Pengadaan Langsung</a></li>";
+      strHTML = strHTML + "</ul>";
+    strHTML = strHTML + "</li>";
+    strHTML = strHTML + "<li><a href='#'>Reporting</a>";
+      strHTML = strHTML + "<ul>";
+        strHTML = strHTML + "<li><a href='RPTPENGADAANLANGSUNG.aspx?usrgrp=SKPD'>Daftar pengadaan langsung di SKPD</a></li>";
+      strHTML = strHTML + "</ul>";
+    strHTML = strHTML + "</li>";
+    strHTML = strHTML + "</ul>";
+
+		return strHTML;
+    }
+	
+    private bool CheckSecurity()
+    {
+        if(string.IsNullOrEmpty(UserName))
+        { 
+            MyUrl = this.Request.AppRelativeCurrentExecutionFilePath;
+            this.Server.Transfer("~/login.aspx?message=expired");
+	        return false;
+        }
+        
+        return true;
+    }
+}

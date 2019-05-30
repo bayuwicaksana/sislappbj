@@ -1,0 +1,9 @@
+@{
+    var myChart = new Chart(width: 600, height: 400, theme: ChartTheme.Yellow)
+        .AddTitle("Rekap Permohonan Lelang Per Bulan")
+        .AddSeries(
+            name: "Bulan",
+            xValue: new[] {  "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des" },
+            yValues: new[] { "1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0" })
+        .Write();
+}

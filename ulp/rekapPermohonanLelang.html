@@ -1,0 +1,41 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['bar']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+			['Bulan', 'Jumlah Paket', { role: 'style' } ],
+			['Jan', [jan], 'gold'],
+			['Feb', [feb], 'gold'],
+			['Mar', [mar], 'gold'],
+			['Apr', [apr], 'gold'],
+			['Mei', [mei], 'gold'],
+			['Jun', [jun], 'gold'],
+			['Jul', [jul], 'gold'],
+			['Ags', [ags], 'gold'],
+			['Sep', [sep], 'gold'],
+			['Okt', [okt], 'gold'],
+			['Nov', [nov], 'gold'],
+			['Dec', [des], 'gold']
+		  ]);
+
+        var options = {
+          chart: {
+            title: 'Rekap Permohonan Lelang Per Bulan',
+            subtitle: 'Tahun [year]',
+          }
+        };
+
+        var chart = new google.charts.Bar(document.getElementById('columnchart_material'));
+
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+      }
+    </script>
+  </head>
+  <body>
+    <div id="columnchart_material" style="width: 550px; height: 350px;"></div>
+  </body>
+</html>

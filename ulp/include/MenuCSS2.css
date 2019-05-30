@@ -1,0 +1,56 @@
+
+/* CSS code */
+#ctl00_menu {
+  background: #ff6600;
+  height: 30px;
+}
+#ctl00_menu ul {
+  margin:0;padding:0;
+}
+#ctl00_menu ul a {
+  text-decoration: none;
+}
+#ctl00_menu ul li {
+  list-style: none;
+  display:inline-block;
+  position: relative;
+  
+}
+#ctl00_menu ul li a {
+  background: #ff6600;
+  color: #fff;
+  border: 1px solid #ff6600;
+  display:inline-block;
+  padding: 5px;
+  width: 145px;
+  
+}
+#ctl00_menu ul ul {
+  padding:0;
+  position: absolute;
+}
+#ctl00_menu ul ul li {
+	
+  float: none;
+  display: none;
+  border-bottom: 1px solid #ff6600;
+  border-left: 1px solid #ff6600;
+  border-right: 1px solid #ff6600; 
+  
+  
+}
+#ctl00_menu ul ul li a {
+  background: #ffeccf;
+  color: #ff6600;
+  border:none;
+}
+#ctl00_menu ul ul li a:hover {
+  background: #ffdaa2;
+  
+}
+#ctl00_menu ul li a:hover, 
+#ctl00_menu ul li:hover ul li {
+  display:block;
+  
+}
+

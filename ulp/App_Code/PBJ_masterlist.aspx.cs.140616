@@ -1,0 +1,172 @@
+using System;
+using System.Data;
+using System.Web.UI.WebControls;
+using System.Collections;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Threading;
+using System.Globalization;
+using System.Text;
+using System.IO;
+using Smarty;
+using Data;
+using SubSonic;
+using System.Web;
+using System.Xml;
+
+public class PBJMasterList
+{
+    public static string CreateMasterTableInfo(string detailtable, string[] keys, System.Web.UI.Page page)
+    {
+        string strTableName = "dbo.PBJ";
+        string oldTableName = strTableName;
+        string keyField = string.Empty;
+        string output = string.Empty;
+        Dictionary<string, object> smarty = new Dictionary<string, object>();
+        Builder builder = Factory.CreateBuilder();
+
+        smarty.Add("__table", strTableName);
+            string sCulture = ConfigurationManager.AppSettings["LCID"];
+            if (!String.IsNullOrEmpty(sCulture)) 
+            {
+                int nCulture = int.Parse(sCulture);
+                smarty.Add("LCID", nCulture);
+                System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo(nCulture, false);
+            } 
+                if(System.Web.HttpContext.Current.Session["locale_xml"] != null)
+        {
+            smarty.Add("Captions", AspNetRunnerPage.GetTableCaptions((XmlNode)System.Web.HttpContext.Current.Session["locale_xml"], 
+                (string)System.Web.HttpContext.Current.Session["language"]));
+            if(!string.IsNullOrEmpty(strTableName))
+            {
+                smarty.Add("Labels", AspNetRunnerPage.GetFieldCaptions((XmlNode)System.Web.HttpContext.Current.Session["locale_xml"], 
+                    (string)System.Web.HttpContext.Current.Session["language"], "dbo_PBJ"));
+            }
+        }
+        IDictionary<string, object> par = new Dictionary<string, object>();
+	        keyField = "KODEPBJ";
+        par[keyField] = keys[1 - 1];
+	        keyField = "KODEPBJ";
+        par[keyField] = keys[1 - 1];
+
+        PBJController controller = new PBJController();
+        PBJ item = controller.FetchByManyID(par);
+
+	    string keylink = string.Empty;
+        if(item != null)
+        {
+	    keylink += "&key1=" + Control.HTMLEncodeSpecialChars(HttpUtility.UrlEncode(item.KODEPBJ.ToString()));
+        }
+        	
+        string value="";
+
+        Control control_KODEPBJ = new Control("KODEPBJ", item.KODEPBJ, false, smarty, page.Request, builder, MODE.MODE_LIST);
+        //	KODEPBJ - 
+	                            value = control_KODEPBJ.GetData();
+			        value = control_KODEPBJ.ProcessLargeText(value,"field=KODEPBJ" + keylink,"",MODE.MODE_LIST);
+			        smarty.Add("KODEPBJ_mastervalue",value);
+
+        Control control_NAMAKEGIATAN = new Control("NAMAKEGIATAN", item.NAMAKEGIATAN, false, smarty, page.Request, builder, MODE.MODE_LIST);
+        //	NAMAKEGIATAN - 
+	                            value = control_NAMAKEGIATAN.GetData();
+			        value = control_NAMAKEGIATAN.ProcessLargeText(value,"field=NAMAKEGIATAN" + keylink,"",MODE.MODE_LIST);
+			        smarty.Add("NAMAKEGIATAN_mastervalue",value);
+
+        Control control_NAMAPAKET = new Control("NAMAPAKET", item.NAMAPAKET, false, smarty, page.Request, builder, MODE.MODE_LIST);
+        //	NAMAPAKET - 
+	                            value = control_NAMAPAKET.GetData();
+			        value = control_NAMAPAKET.ProcessLargeText(value,"field=NAMAPAKET" + keylink,"",MODE.MODE_LIST);
+			        smarty.Add("NAMAPAKET_mastervalue",value);
+
+        Control control_KODESKPD = new Control("KODESKPD", item.KODESKPD, false, smarty, page.Request, builder, MODE.MODE_LIST);
+        //	KODESKPD - 
+	                            control_KODESKPD.Value = func.GetLookupValue(control_KODESKPD.FieldInfo);
+                    value=control_KODESKPD.DisplayLookupWizard();
+			        smarty.Add("KODESKPD_mastervalue",value);
+
+        Control control_PPK = new Control("PPK", item.PPK, false, smarty, page.Request, builder, MODE.MODE_LIST);
+        //	PPK - 
+	                            control_PPK.Value = func.GetLookupValue(control_PPK.FieldInfo);
+                    value=control_PPK.DisplayLookupWizard();
+			        smarty.Add("PPK_mastervalue",value);
+
+        Control control_PPTK = new Control("PPTK", item.PPTK, false, smarty, page.Request, builder, MODE.MODE_LIST);
+        //	PPTK - 
+	                            control_PPTK.Value = func.GetLookupValue(control_PPTK.FieldInfo);
+                    value=control_PPTK.DisplayLookupWizard();
+			        smarty.Add("PPTK_mastervalue",value);
+
+        Control control_KODEJENISKEGIATAN = new Control("KODEJENISKEGIATAN", item.KODEJENISKEGIATAN, false, smarty, page.Request, builder, MODE.MODE_LIST);
+        //	KODEJENISKEGIATAN - 
+	                            control_KODEJENISKEGIATAN.Value = func.GetLookupValue(control_KODEJENISKEGIATAN.FieldInfo);
+                    value=control_KODEJENISKEGIATAN.DisplayLookupWizard();
+			        smarty.Add("KODEJENISKEGIATAN_mastervalue",value);
+
+        Control control_PROSESPENGADAAN = new Control("PROSESPENGADAAN", item.PROSESPENGADAAN, false, smarty, page.Request, builder, MODE.MODE_LIST);
+        //	PROSESPENGADAAN - 
+	                            value = control_PROSESPENGADAAN.GetData();
+			        value = control_PROSESPENGADAAN.ProcessLargeText(value,"field=PROSESPENGADAAN" + keylink,"",MODE.MODE_LIST);
+			        smarty.Add("PROSESPENGADAAN_mastervalue",value);
+
+        Control control_TANGGALPENGAJUAN = new Control("TANGGALPENGAJUAN", item.TANGGALPENGAJUAN, false, smarty, page.Request, builder, MODE.MODE_LIST);
+        //	TANGGALPENGAJUAN - Short Date
+	                            value = control_TANGGALPENGAJUAN.GetData();
+			        value = control_TANGGALPENGAJUAN.ProcessLargeText(value,"field=TANGGALPENGAJUAN" + keylink,"",MODE.MODE_LIST);
+			        smarty.Add("TANGGALPENGAJUAN_mastervalue",value);
+
+        Control control_PEMBAWABERKAS1 = new Control("PEMBAWABERKAS1", item.PEMBAWABERKAS1, false, smarty, page.Request, builder, MODE.MODE_LIST);
+        //	PEMBAWABERKAS1 - 
+	                            value = control_PEMBAWABERKAS1.GetData();
+			        value = control_PEMBAWABERKAS1.ProcessLargeText(value,"field=PEMBAWABERKAS1" + keylink,"",MODE.MODE_LIST);
+			        smarty.Add("PEMBAWABERKAS1_mastervalue",value);
+
+        Control control_PENERIMABERKAS1 = new Control("PENERIMABERKAS1", item.PENERIMABERKAS1, false, smarty, page.Request, builder, MODE.MODE_LIST);
+        //	PENERIMABERKAS1 - 
+	                            value = control_PENERIMABERKAS1.GetData();
+			        value = control_PENERIMABERKAS1.ProcessLargeText(value,"field=PENERIMABERKAS1" + keylink,"",MODE.MODE_LIST);
+			        smarty.Add("PENERIMABERKAS1_mastervalue",value);
+
+        Control control_PEMBAWABERKAS2 = new Control("PEMBAWABERKAS2", item.PEMBAWABERKAS2, false, smarty, page.Request, builder, MODE.MODE_LIST);
+        //	PEMBAWABERKAS2 - 
+	                            value = control_PEMBAWABERKAS2.GetData();
+			        value = control_PEMBAWABERKAS2.ProcessLargeText(value,"field=PEMBAWABERKAS2" + keylink,"",MODE.MODE_LIST);
+			        smarty.Add("PEMBAWABERKAS2_mastervalue",value);
+
+        Control control_PENERIMABERKAS2 = new Control("PENERIMABERKAS2", item.PENERIMABERKAS2, false, smarty, page.Request, builder, MODE.MODE_LIST);
+        //	PENERIMABERKAS2 - 
+	                            value = control_PENERIMABERKAS2.GetData();
+			        value = control_PENERIMABERKAS2.ProcessLargeText(value,"field=PENERIMABERKAS2" + keylink,"",MODE.MODE_LIST);
+			        smarty.Add("PENERIMABERKAS2_mastervalue",value);
+
+        Control control_LENGKAP = new Control("LENGKAP", item.LENGKAP, false, smarty, page.Request, builder, MODE.MODE_LIST);
+        //	LENGKAP - 
+	                            value = control_LENGKAP.GetData();
+			        value = control_LENGKAP.ProcessLargeText(value,"field=LENGKAP" + keylink,"",MODE.MODE_LIST);
+			        smarty.Add("LENGKAP_mastervalue",value);
+
+        Control control_DIKEMBALIKAN = new Control("DIKEMBALIKAN", item.DIKEMBALIKAN, false, smarty, page.Request, builder, MODE.MODE_LIST);
+        //	DIKEMBALIKAN - 
+	                            value = control_DIKEMBALIKAN.GetData();
+			        value = control_DIKEMBALIKAN.ProcessLargeText(value,"field=DIKEMBALIKAN" + keylink,"",MODE.MODE_LIST);
+			        smarty.Add("DIKEMBALIKAN_mastervalue",value);
+
+        Control control_TANGGALKEMBALI = new Control("TANGGALKEMBALI", item.TANGGALKEMBALI, false, smarty, page.Request, builder, MODE.MODE_LIST);
+        //	TANGGALKEMBALI - Short Date
+	                            value = control_TANGGALKEMBALI.GetData();
+			        value = control_TANGGALKEMBALI.ProcessLargeText(value,"field=TANGGALKEMBALI" + keylink,"",MODE.MODE_LIST);
+			        smarty.Add("TANGGALKEMBALI_mastervalue",value);
+
+        Control control_KODESTATUSPBJ = new Control("KODESTATUSPBJ", item.KODESTATUSPBJ, false, smarty, page.Request, builder, MODE.MODE_LIST);
+        //	KODESTATUSPBJ - 
+	                            control_KODESTATUSPBJ.Value = func.GetLookupValue(control_KODESTATUSPBJ.FieldInfo);
+                    value=control_KODESTATUSPBJ.DisplayLookupWizard();
+			        smarty.Add("KODESTATUSPBJ_mastervalue",value);
+
+        Control control_CATATAN = new Control("CATATAN", item.CATATAN, false, smarty, page.Request, builder, MODE.MODE_LIST);
+        //	CATATAN - 
+	                            value = control_CATATAN.GetData();
+			        value = control_CATATAN.ProcessLargeText(value,"field=CATATAN" + keylink,"",MODE.MODE_LIST);
+			        smarty.Add("CATATAN_mastervalue",value);
+            return func.BuildOutput(page, @"~\PBJ_masterlist.aspx", smarty);
+    }
+}

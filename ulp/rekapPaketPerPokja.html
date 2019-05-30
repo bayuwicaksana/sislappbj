@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['bar']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+			['Nama Pokja', 'Jumlah Paket', { role: 'style' } ],
+			['[POKJA1]', [JUMLAH1], 'gold'],
+			['[POKJA2]', [JUMLAH2], 'gold'],
+			['[POKJA3]', [JUMLAH3], 'gold'],
+			['[POKJA4]', [JUMLAH4], 'gold'],
+			['[POKJA5]', [JUMLAH5], 'gold'],
+			['[POKJA6]', [JUMLAH6], 'gold']
+		  ]);
+
+        var options = {
+          chart: {
+            title: 'Jumlah Paket Per Pokja',
+            subtitle: 'Tahun [year]',
+          }
+        };
+
+        var chart = new google.charts.Bar(document.getElementById('columnchart_material'));
+
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+      }
+    </script>
+  </head>
+  <body>
+    <div id="columnchart_material" style="width: 550px; height: 350px;"></div>
+  </body>
+</html>

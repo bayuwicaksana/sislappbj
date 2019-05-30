@@ -1,0 +1,9 @@
+@{
+    var myChart = new Chart(width: 600, height: 400, theme: ChartTheme.Yellow)
+        .AddTitle("Jumlah Paket Per Pokja")
+        .AddSeries(
+            name: "Status",
+            xValue: new[] {  "Pokja 1 2018", "[POKJA2]", "[POKJA3]", "[POKJA4]", "[POKJA5]", "[POKJA6]" },
+            yValues: new[] { "1", "[JUMLAH2]", "[JUMLAH3]", "[JUMLAH4]", "[JUMLAH5]", "[JUMLAH6]" })
+        .Write();
+}

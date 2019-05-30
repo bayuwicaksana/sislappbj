@@ -1,0 +1,349 @@
+<languages>
+<EventCodes language="CSharp" framework="2">
+<EventCode type="EMAIL" name="Send simple email" events="all" code="
+//Send simple email
+// do not forget to setup email parameters like From, SMTP server etc
+// on 'Security->User login settings' dialog
+
+  func.SendMail(&quot;test@test.com&quot;, &quot;Sample subject&quot;, &quot;Sample body&quot;);
+">
+<Events/>
+</EventCode>
+
+<EventCode type="EMAIL" name="Send email with old data record" code="
+//Send email with old data record
+// do not forget to setup email parameters like From, SMTP server etc
+// on 'Security->User login settings' dialog
+    string message = &quot;&quot;;
+    try
+    {
+        acme = Acme.FetchByID(e[&quot;ID&quot;]);
+        message = e[&quot;Field1&quot;].ToString();
+        message += &quot;, &quot;;
+        message += e[&quot;Field2&quot;].ToString();
+        message += &quot;\n&quot;;
+    }
+    finally
+    {
+    }
+    
+    func.SendMail(&quot;test@test.com&quot;, &quot;Sample subject&quot;, message);
+">
+<Events>
+<Event>EVENT_BEFOREDELETE</Event>
+<Event>EVENT_BEFOREEDIT</Event>
+<Event>EVENT_BEFORECOPY</Event>
+</Events>
+</EventCode>
+
+<EventCode type="EMAIL" name="Send email with new data" code="
+//Send email with new data
+// do not forget to setup email parameters like From, SMTP server etc
+// on 'Security->User login settings' dialog
+
+  string message = &quot;&quot;;
+  message = e[&quot;Field1&quot;].ToString();
+  message += &quot;, &quot;;
+  message += e[&quot;Field2&quot;].ToString();
+  message += &quot;\n&quot;;
+  func.SendMail(&quot;test@test.com&quot;, &quot;Sample subject&quot;, message);
+
+">
+
+<Events>
+<Event>EVENT_BEFOREREGISTER</Event>
+<Event>EVENT_BEFOREADD</Event>
+<Event>EVENT_BEFOREEDIT</Event>
+<Event>EVENT_BEFORECOPY</Event>
+</Events>
+</EventCode>
+
+
+<EventCode type="OTHER" name="Display a message on the Web page" events="all" code="
+//Display a message on the Web page
+
+  Page.Response.Write(&quot;Your message here&quot;);
+
+">
+<Events/>
+</EventCode>
+
+
+<EventCode type="DATABASE" name="Save old data record in another table" code="
+//Save old data record in another table
+    
+    AnotherAcme anotherAcme = new AnotherAcme();
+    anotherAcme.Field1 = e[&quot;Field1&quot;];
+    anotherAcme.Field2 = e[&quot;Field2&quot;];
+    
+    try
+    {
+      anotherAcme.Save(&quot;username&quot;);
+    }
+    finally
+    {
+    }    
+">
+<Events>
+<Event>EVENT_BEFOREDELETE</Event>
+<Event>EVENT_BEFOREEDIT</Event>
+<Event>EVENT_BEFORECOPY</Event>
+</Events>
+</EventCode>
+ 
+<EventCode type="DATABASE" name="Save new data in another table" code="
+//Save new data in another table
+
+    AnotherAcme anotherAcme = new AnotherAcme();
+    anotherAcme.Field1 = e[&quot;Field1&quot;];
+    anotherAcme.Field2 = e[&quot;Field2&quot;];
+    
+    try
+    {
+      anotherAcme.Save(&quot;username&quot;);
+    }
+    finally
+    {
+    }    
+">
+<Events>
+<Event>EVENT_BEFOREREGISTER</Event>
+<Event>EVENT_BEFOREADD</Event>
+<Event>EVENT_BEFOREEDIT</Event>
+<Event>EVENT_BEFORECOPY</Event>
+</Events>
+</EventCode>
+
+
+<EventCode type="DATABASE" name="Insert a record into another table" events="all" code="
+//Insert a record into another table
+    AnotherAcme anotherAcme = new AnotherAcme();
+    anotherAcme.Field1 = e[&quot;Field1&quot;];
+    anotherAcme.Field2 = e[&quot;Field2&quot;];
+    
+    try
+    {
+      anotherAcme.Save(&quot;username&quot;);
+    }
+    finally
+    {
+    }    
+">
+<Events/>
+</EventCode>
+
+
+<EventCode type="OTHER" name="Redirect to another page" events="all" code="
+//Redirect to another page
+Page.Response.Redirect(&quot;anypage.aspx&quot;);
+
+">
+<Events/>
+</EventCode>
+
+
+<EventCode type="DATABASE" name="Check if specific record exists" events="all" code="
+//Check if specific record exists 
+
+    Query query = new Query(AnyTable.Schema).WHERE(&quot;AnyColumn&quot;, &quot;valueToLookFor&quot;);
+    int count = 0;
+    
+    try
+    {
+        count = query.GetRecordCount();
+        if (count > 0)
+        {
+            // if record exists do something
+        }
+        else
+        {
+            //if dont exist do something else
+        }
+    }
+    finally
+    {
+    } 
+">
+<Events/>
+</EventCode>
+
+
+<EventCode type="OTHER" name="Custom code" events="all" code="
+//Custom code
+//put your custom code here
+
+">
+<Events/>
+</EventCode>
+
+</EventCodes>
+
+<EventCodes language="vb.net" framework="2">
+<EventCode type="EMAIL" name="Send simple email" events="all" code="
+'Send simple email
+' do not forget to setup email parameters like From, SMTP server etc
+' on 'Security->User login settings' dialog
+
+  func.SendMail(&quot;test@test.com&quot;, &quot;Sample subject&quot;, &quot;Sample body&quot;)
+">
+<Events/>
+</EventCode>
+
+<EventCode type="EMAIL" name="Send email with old data record" code="
+'Send email with old data record
+' do not forget to setup email parameters like From, SMTP server etc
+' on 'Security->User login settings' dialog
+    Dim message As String= &quot;&quot;
+    Try
+        acme = Acme.FetchByID(e[&quot;ID&quot;])
+        message = e[&quot;Field1&quot;].ToString()
+        message += &quot;, &quot;
+        message += e[&quot;Field2&quot;].ToString()
+        message += &quot;\n&quot;
+    Finally
+    End Try
+
+    func.SendMail( &quot;test@test.com &quot;, &quot;Sample subject &quot;, message)
+">
+<Events>
+<Event>EVENT_BEFOREDELETE</Event>
+<Event>EVENT_BEFOREEDIT</Event>
+<Event>EVENT_BEFORECOPY</Event>
+</Events>
+</EventCode>
+
+<EventCode type="EMAIL" name="Send email with new data" code="
+'Send email with new data
+' do not forget to setup email parameters like From, SMTP server etc
+' on 'Security->User login settings' dialog
+
+  Dim message As String= &quot;&quot;
+   
+  message = e[&quot;Field1&quot;].ToString()
+  message += &quot;, &quot;
+  message += e[&quot;Field2&quot;].ToString()
+  message += &quot;\n&quot;
+  
+  func.SendMail( &quot;test@test.com &quot;, &quot;Sample subject &quot;, message)
+
+">
+
+<Events>
+<Event>EVENT_BEFOREREGISTER</Event>
+<Event>EVENT_BEFOREADD</Event>
+<Event>EVENT_BEFOREEDIT</Event>
+<Event>EVENT_BEFORECOPY</Event>
+</Events>
+</EventCode>
+
+
+<EventCode type="OTHER" name="Display a message on the Web page" events="all" code="
+'Display a message on the Web page
+
+  Page.Response.Write(&quot;Your message here&quot;)
+
+">
+<Events/>
+</EventCode>
+
+
+<EventCode type="DATABASE" name="Save old data record in another table" code="
+'Save old data record in another table
+    
+    Dim anotherAcme As Acme = New Acme()
+
+    anotherAcme.Field1 = e[&quot;Field1&quot;]
+    anotherAcme.Field2 = e[&quot;Field2&quot;]
+    
+    Try
+      anotherAcme.Save(&quot;username&quot;)
+    Finally
+    End Try
+">
+<Events>
+<Event>EVENT_BEFOREDELETE</Event>
+<Event>EVENT_BEFOREEDIT</Event>
+<Event>EVENT_BEFORECOPY</Event>
+</Events>
+</EventCode>
+ 
+<EventCode type="DATABASE" name="Save new data in another table" code="
+'Save new data in another table
+
+    Dim anotherAcme As Acme = New Acme()
+
+    anotherAcme.Field1 = e[&quot;Field1&quot;]
+    anotherAcme.Field2 = e[&quot;Field2&quot;]
+    
+    Try
+      anotherAcme.Save(&quot;username&quot;)
+    Finally
+    End Try    
+">
+<Events>
+<Event>EVENT_BEFOREREGISTER</Event>
+<Event>EVENT_BEFOREADD</Event>
+<Event>EVENT_BEFOREEDIT</Event>
+<Event>EVENT_BEFORECOPY</Event>
+</Events>
+</EventCode>
+
+
+<EventCode type="DATABASE" name="Insert a record into another table" events="all" code="
+'Insert a record into another table
+    Dim anotherAcme As Acme = New Acme()
+
+    anotherAcme.Field1 = e[&quot;Field1&quot;]
+    anotherAcme.Field2 = e[&quot;Field2&quot;]
+    
+    Try
+      anotherAcme.Save(&quot;username&quot;)
+    Finally
+    End Try    
+">
+<Events/>
+</EventCode>
+
+
+<EventCode type="OTHER" name="Redirect to another page" events="all" code="
+'Redirect to another page
+Page.Response.Redirect(&quot;anypage.aspx&quot;)
+
+">
+<Events/>
+</EventCode>
+
+
+<EventCode type="DATABASE" name="Check if specific record exists" events="all" code="
+'Check if specific record exists 
+    
+    Dim query As Query = New Query(AnyTable.Schema)
+    
+    query.WHERE(&quot;AnyColumn&quot;, &quot;valueToLookFor&quot;)
+    
+    Dim count As Integer
+  
+    Try
+        count = query.GetRecordCount()
+        If count > 0 Then
+          'if record exists do something
+        Else
+          'if dont exist do something else
+        End If
+    Finally
+    End Try
+">
+<Events/>
+</EventCode>
+
+
+<EventCode type="OTHER" name="Custom code" events="all" code="
+'Custom code
+'put your custom code here
+
+">
+<Events/>
+</EventCode>
+
+</EventCodes>
+</languages>

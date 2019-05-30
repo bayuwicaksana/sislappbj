@@ -1,0 +1,85 @@
+<%@ Page Language="VB" AutoEventWireup="true" CodeFile="Reporting.vb" Inherits="Reporting" MasterPageFile="~/Default.master" Title="Reporting"%>
+<asp:Content ID="Content1" Runat="Server" ContentPlaceHolderID="ContentPlaceHolder1">
+<script language="javascript" type="text/javascript">
+        function printDiv(divID) {
+            //Get the HTML of div
+            var divElements = document.getElementById(divID).innerHTML;
+            //Get the HTML of whole page
+            var oldPage = document.body.innerHTML;
+
+            //Reset the page's HTML with div's HTML only
+            document.body.innerHTML = "<html><head><title></title></head><body>" + divElements + "</body>";
+
+            //Print Page
+            window.print();
+
+            //Restore orignal HTML
+            document.body.innerHTML = oldPage;
+
+          
+        }
+    </script> 
+
+ <center>
+	<br>
+    <table width="70%" cellpadding=2 cellspacing=3 bgcolor="ffeccf">
+        <tr>
+            <td colspan=2>&nbsp;</td>
+        </tr>
+        <tr>
+            <td width="40%" align="right">Bulan : </td>
+            <td align='left'>
+                <asp:DropDownList ID="ddlBM1" runat="server" DataSourceID="sqlDtSrcBM" DataTextField="BULAN" DataValueField="BULAN" AutoPostBack="false">
+                </asp:DropDownList> 
+		 s/d 
+		<asp:DropDownList ID="ddlBM2" runat="server" DataSourceID="sqlDtSrcBM" DataTextField="BULAN" DataValueField="BULAN" AutoPostBack="false">
+                </asp:DropDownList>
+		
+                <asp:SqlDataSource ID="sqlDtSrcBM"
+    runat="server"
+    ConnectionString="<%$ ConnectionStrings:ConnectionString %>"
+    SelectCommand="with monthlist as (select 1 as bulan union all select yl.bulan + 1 as bulan from monthlist yl where yl.bulan + 1 <= MONTH('2020-12-31')) select bulan from monthlist order by bulan asc;">
+                </asp:SqlDataSource>
+            </td>
+        </tr>
+        <tr>
+            <td width="40%" align="right">Tahun : </td>
+            <td align='left'>
+                <asp:DropDownList ID="ddlTA" runat="server" DataSourceID="sqlDtSrcTA" DataTextField="THN_ANGGARAN" DataValueField="THN_ANGGARAN" AutoPostBack="True">
+                </asp:DropDownList>
+                <asp:SqlDataSource ID="sqlDtSrcTA"
+    runat="server"
+    ConnectionString="<%$ ConnectionStrings:ConnectionString %>"
+    SelectCommand="with yearlist as (select 2010 as year union all select yl.year + 1 as year from yearlist yl where yl.year + 1 <= YEAR('2020-12-31')) select year as THN_ANGGARAN from yearlist order by year desc;">
+                </asp:SqlDataSource>
+            </td>
+        </tr>
+        <tr>
+            <td width="40%" align="right">Status : </td>
+            <td align='left'>
+                <asp:DropDownList ID="ddlStatus" runat="server" DataSourceID="sqlDtSrcStatus" DataTextField="Deskripsi" DataValueField="KodeStatus" AutoPostBack="True">
+                </asp:DropDownList> 
+		
+                <asp:SqlDataSource ID="sqlDtSrcStatus"
+    runat="server"
+    ConnectionString="<%$ ConnectionStrings:ConnectionString %>"
+    SelectCommand="select KodeStatus, Deskripsi, urutan from statusPBJ union select 'All','All', 0 as urutan order by urutan">
+                </asp:SqlDataSource>
+            </td>
+        </tr>
+       
+        <tr>
+            <td colspan=2 align="center" >
+                <asp:Button ID="btnRetrieve" runat="server" Text="Lihat" />
+                <input type="button" value="Cetak" onclick="javascript:printDiv('ctl00_ContentPlaceHolder1_dv')" />
+				
+				</td>
+        </tr>
+    </table>      
+	</center>
+    <br />
+		  
+		  <div id="dv" runat="server">
+		  
+		  </div>
+</asp:Content>
